@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "author": "Maulana Rahman Ashshiddiq",
+  "author": "MrAshshiddiq",
   "license": "MIT",
   "dependencies": {
     "ethers": "^6.6.2"
