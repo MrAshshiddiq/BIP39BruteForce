@@ -93,7 +93,7 @@ function makeProgressBar(percent, length = 30) {
 }
 
 async function bruteForce(originalWords, target) {
-  const wordlist = String(fs.readFileSync("./english.txt")).split("\n");
+  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n");
   const missingCount = originalWords.filter((w) => w === "x").length;
   const placeholder = /\bx\b/;
   const totalCombos = BigInt(wordlist.length) ** BigInt(missingCount);
