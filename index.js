@@ -14,7 +14,7 @@ const colors = {
   white: "\x1b[37m",
 };
 
-// Setup readline
+// Setup readline (hanya sekali)
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -34,6 +34,16 @@ function welcomeMessage() {
   console.log("              IG: maulanarahmanashshiddiq");
   console.log(" ");
   console.log("===============================================" + colors.reset);
+}
+
+// Validasi alamat dengan ethers getAddress, handle trim dan case
+function validateAddress(input) {
+  try {
+    // pastikan trim dan lowercase (getAddress case insensitive)
+    return getAddress(input.trim());
+  } catch {
+    return null;
+  }
 }
 
 async function mainMenu() {
@@ -69,10 +79,12 @@ async function mainMenu() {
   while (true) {
     const targetInput = await askQuestion(colors.yellow + "Masukkan target address EVM:\n> " + colors.reset);
 
-    try {
-      target = getAddress(targetInput.trim());
+    const validAddress = validateAddress(targetInput);
+
+    if (validAddress) {
+      target = validAddress;
       break;
-    } catch {
+    } else {
       console.log(colors.red + "❌ Alamat wallet tidak valid!" + colors.reset);
     }
   }
@@ -94,7 +106,7 @@ function makeProgressBar(percent, length = 30) {
 
 async function bruteForce(originalWords, target) {
   const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n");
-  const missingCount = originalWords.filter((w) => w === "x").length;
+  const missingCount = originalWords.filter((w) => w.toLowerCase() === "x").length;
   const placeholder = /\bx\b/;
   const totalCombos = BigInt(wordlist.length) ** BigInt(missingCount);
 
@@ -144,7 +156,7 @@ async function bruteForce(originalWords, target) {
       console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
-        if (originalWords[idx] === "x") {
+        if (originalWords[idx].toLowerCase() === "x") {
           return colors.yellow + word + colors.reset;
         } else {
           return colors.cyan + word + colors.reset;
