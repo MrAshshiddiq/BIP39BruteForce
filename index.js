@@ -31,8 +31,7 @@ function welcomeMessage() {
   console.log(colors.cyan + "===============================================");
   console.log(" ");
   console.log(" Selamat Datang di Tools Brute Force by MrAshshiddiq");
-  console.log("              IG: maulanarahmanashshiddiq");
-  console.log("       Github: https://github.com/MrAshshiddiq");
+  console.log("              (Fork by ItsNickBarry) ");
   console.log(" ");
   console.log("===============================================" + colors.reset);
 }
@@ -94,7 +93,7 @@ function makeProgressBar(percent, length = 30) {
 }
 
 async function bruteForce(originalWords, target) {
-  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n");
+  const wordlist = String(fs.readFileSync("./english.txt")).split("\n");
   const missingCount = originalWords.filter((w) => w === "x").length;
   const placeholder = /\bx\b/;
   const totalCombos = BigInt(wordlist.length) ** BigInt(missingCount);
@@ -103,8 +102,6 @@ async function bruteForce(originalWords, target) {
   const startTime = Date.now();
 
   console.log(colors.cyan + "\n🔍 Proses brute force dimulai..." + colors.reset);
-  // print initial empty progress bar line
-  console.log(makeProgressBar(0) + ` 0.00% | Tried: 0 / ${totalCombos} | ETA: --`);
 
   const timer = setInterval(() => {
     const percent = (Number(tried) / Number(totalCombos)) * 100;
@@ -112,13 +109,13 @@ async function bruteForce(originalWords, target) {
     const speed = Number(tried) / elapsed; // percobaan per detik
     const eta = speed > 0 ? (Number(totalCombos - tried) / speed) : 0;
 
-    // pindah ke baris progress terakhir (garis ke-2 dari bawah), lalu tulis ulang
-    readline.moveCursor(process.stdout, 0, -1); // naik satu baris
+    readline.cursorTo(process.stdout, 0);
     readline.clearLine(process.stdout, 0);
 
     process.stdout.write(
       makeProgressBar(percent) +
-      ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`
+      ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`,
+      () => {}
     );
   }, 500);
 
@@ -142,10 +139,8 @@ async function bruteForce(originalWords, target) {
     if (address === target) {
       clearInterval(timer);
 
-      // pindah ke baris progress terakhir dan clear
-      readline.moveCursor(process.stdout, 0, -1);
+      readline.cursorTo(process.stdout, 0);
       readline.clearLine(process.stdout, 0);
-
       console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
@@ -171,10 +166,8 @@ async function bruteForce(originalWords, target) {
 
   clearInterval(timer);
 
-  // bersihkan bar progress terakhir
-  readline.moveCursor(process.stdout, 0, -1);
+  readline.cursorTo(process.stdout, 0);
   readline.clearLine(process.stdout, 0);
-
   console.log("\n" + colors.red + "❌ Tidak ada kecocokan ditemukan." + colors.reset);
 
   await mainMenu();
