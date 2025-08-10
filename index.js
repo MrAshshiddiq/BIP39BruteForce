@@ -115,20 +115,19 @@ async function bruteForce(originalWords, target) {
 
   console.log(colors.cyan + "\n🔍 Proses brute force dimulai..." + colors.reset);
 
+  // Ganti setInterval update progress bar
   const timer = setInterval(() => {
     const percent = (Number(tried) / Number(totalCombos)) * 100;
     const elapsed = (Date.now() - startTime) / 1000;
     const speed = Number(tried) / elapsed; // percobaan per detik
     const eta = speed > 0 ? (Number(totalCombos - tried) / speed) : 0;
 
-    readline.cursorTo(process.stdout, 0);
-    readline.clearLine(process.stdout, 0);
-
-    process.stdout.write(
+    const progressStr =
       makeProgressBar(percent) +
-      ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`,
-      () => {}
-    );
+      ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`;
+
+    // Tulis di baris yang sama, overwrite pakai \r tanpa newline
+    process.stdout.write('\r' + progressStr);
   }, 500);
 
   for (let i = 0n; i < totalCombos; i++) {
@@ -151,8 +150,9 @@ async function bruteForce(originalWords, target) {
     if (address === target) {
       clearInterval(timer);
 
-      readline.cursorTo(process.stdout, 0);
-      readline.clearLine(process.stdout, 0);
+      // Bersihkan baris progress terakhir sebelum output hasil
+      process.stdout.write('\r' + ' '.repeat(100) + '\r');
+
       console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
@@ -178,8 +178,9 @@ async function bruteForce(originalWords, target) {
 
   clearInterval(timer);
 
-  readline.cursorTo(process.stdout, 0);
-  readline.clearLine(process.stdout, 0);
+  // Bersihkan baris progress terakhir sebelum output hasil
+  process.stdout.write('\r' + ' '.repeat(100) + '\r');
+
   console.log("\n" + colors.red + "❌ Tidak ada kecocokan ditemukan." + colors.reset);
 
   await mainMenu();
