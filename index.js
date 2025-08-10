@@ -105,7 +105,7 @@ function makeProgressBar(percent, length = 30) {
 }
 
 async function bruteForce(originalWords, target) {
-  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n");
+  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n").map(w => w.trim()).filter(Boolean);
   const missingCount = originalWords.filter((w) => w.toLowerCase() === "x").length;
   const placeholder = /\bx\b/;
   const totalCombos = BigInt(wordlist.length) ** BigInt(missingCount);
@@ -115,7 +115,6 @@ async function bruteForce(originalWords, target) {
 
   console.log(colors.cyan + "\n🔍 Proses brute force dimulai..." + colors.reset);
 
-  // Ganti setInterval update progress bar
   const timer = setInterval(() => {
     const percent = (Number(tried) / Number(totalCombos)) * 100;
     const elapsed = (Date.now() - startTime) / 1000;
@@ -126,9 +125,10 @@ async function bruteForce(originalWords, target) {
       makeProgressBar(percent) +
       ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`;
 
-    // Tulis di baris yang sama, overwrite pakai \r tanpa newline
-    process.stdout.write('\r' + progressStr);
-  }, 500);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
+    process.stdout.write(progressStr);
+  }, 100);
 
   for (let i = 0n; i < totalCombos; i++) {
     let testPhrase = originalWords.join(" ");
@@ -150,9 +150,8 @@ async function bruteForce(originalWords, target) {
     if (address === target) {
       clearInterval(timer);
 
-      // Bersihkan baris progress terakhir sebelum output hasil
-      process.stdout.write('\r' + ' '.repeat(100) + '\r');
-
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
       console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
@@ -178,9 +177,8 @@ async function bruteForce(originalWords, target) {
 
   clearInterval(timer);
 
-  // Bersihkan baris progress terakhir sebelum output hasil
-  process.stdout.write('\r' + ' '.repeat(100) + '\r');
-
+  readline.clearLine(process.stdout, 0);
+  readline.cursorTo(process.stdout, 0);
   console.log("\n" + colors.red + "❌ Tidak ada kecocokan ditemukan." + colors.reset);
 
   await mainMenu();
