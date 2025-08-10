@@ -39,11 +39,22 @@ function welcomeMessage() {
 // Validasi alamat dengan ethers getAddress, handle trim dan case
 function validateAddress(input) {
   try {
-    // pastikan trim dan lowercase (getAddress case insensitive)
     return getAddress(input.trim());
   } catch {
     return null;
   }
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}m ${s}s`;
+}
+
+function makeProgressBar(percent, length = 30) {
+  const filled = Math.floor(length * percent / 100);
+  const bar = "█".repeat(filled) + "░".repeat(length - filled);
+  return `[${bar}]`;
 }
 
 async function mainMenu() {
@@ -92,20 +103,8 @@ async function mainMenu() {
   await bruteForce(originalWords, target);
 }
 
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}m ${s}s`;
-}
-
-function makeProgressBar(percent, length = 30) {
-  const filled = Math.floor(length * percent / 100);
-  const bar = "█".repeat(filled) + "░".repeat(length - filled);
-  return `[${bar}]`;
-}
-
 async function bruteForce(originalWords, target) {
-  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n").map(w => w.trim()).filter(Boolean);
+  const wordlist = String(fs.readFileSync("./bip39.txt")).split("\n");
   const missingCount = originalWords.filter((w) => w.toLowerCase() === "x").length;
   const placeholder = /\bx\b/;
   const totalCombos = BigInt(wordlist.length) ** BigInt(missingCount);
@@ -114,21 +113,6 @@ async function bruteForce(originalWords, target) {
   const startTime = Date.now();
 
   console.log(colors.cyan + "\n🔍 Proses brute force dimulai..." + colors.reset);
-
-  const timer = setInterval(() => {
-    const percent = (Number(tried) / Number(totalCombos)) * 100;
-    const elapsed = (Date.now() - startTime) / 1000;
-    const speed = Number(tried) / elapsed; // percobaan per detik
-    const eta = speed > 0 ? (Number(totalCombos - tried) / speed) : 0;
-
-    const progressStr =
-      makeProgressBar(percent) +
-      ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`;
-
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
-    process.stdout.write(progressStr);
-  }, 100);
 
   for (let i = 0n; i < totalCombos; i++) {
     let testPhrase = originalWords.join(" ");
@@ -148,10 +132,9 @@ async function bruteForce(originalWords, target) {
     }
 
     if (address === target) {
-      clearInterval(timer);
-
-      readline.clearLine(process.stdout, 0);
       readline.cursorTo(process.stdout, 0);
+      readline.clearLine(process.stdout, 0);
+
       console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
@@ -173,12 +156,29 @@ async function bruteForce(originalWords, target) {
         process.exit(0);
       }
     }
+
+    if (tried % 2048n === 0n) {
+      const percent = (Number(tried) / Number(totalCombos)) * 100;
+      const elapsed = (Date.now() - startTime) / 1000;
+      const speed = Number(tried) / elapsed; // percobaan per detik
+      const eta = speed > 0 ? (Number(totalCombos - tried) / speed) : 0;
+
+      readline.cursorTo(process.stdout, 0);
+      readline.clearLine(process.stdout, 0);
+
+      process.stdout.write(
+        makeProgressBar(percent) +
+          ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`
+      );
+    }
+
+    // Biar event loop gak blocked, kasih yield tiap 10000 iterasi
+    if (i % 10000n === 0n) await new Promise((r) => setImmediate(r));
   }
 
-  clearInterval(timer);
-
-  readline.clearLine(process.stdout, 0);
   readline.cursorTo(process.stdout, 0);
+  readline.clearLine(process.stdout, 0);
+
   console.log("\n" + colors.red + "❌ Tidak ada kecocokan ditemukan." + colors.reset);
 
   await mainMenu();
