@@ -45,16 +45,16 @@ function validateAddress(input) {
   }
 }
 
+function makeProgressBar(percent) {
+  const total = 30; // panjang bar
+  const filled = Math.floor((percent / 100) * total);
+  return "[" + "█".repeat(filled) + "░".repeat(total - filled) + "]";
+}
+
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
-}
-
-function makeProgressBar(percent, length = 30) {
-  const filled = Math.floor(length * percent / 100);
-  const bar = "█".repeat(filled) + "░".repeat(length - filled);
-  return `[${bar}]`;
 }
 
 async function mainMenu() {
@@ -112,11 +112,10 @@ async function bruteForce(originalWords, target) {
   let tried = 0n;
   const startTime = Date.now();
 
-  console.log(colors.cyan + "\n🔍 Proses brute force dimulai..." + colors.reset);
+  console.log("\n🔍 Proses brute force dimulai...");
 
   for (let i = 0n; i < totalCombos; i++) {
     let testPhrase = originalWords.join(" ");
-
     for (let j = 0; j < missingCount; j++) {
       const index = (i / BigInt(wordlist.length) ** BigInt(j)) % BigInt(wordlist.length);
       testPhrase = testPhrase.replace(placeholder, wordlist[Number(index)]);
@@ -132,10 +131,7 @@ async function bruteForce(originalWords, target) {
     }
 
     if (address === target) {
-      readline.cursorTo(process.stdout, 0);
-      readline.clearLine(process.stdout, 0);
-
-      console.log("\n" + colors.white + "✅ MATCH DITEMUKAN :" + colors.reset);
+      process.stdout.write("\n✅ MATCH DITEMUKAN!\n");
 
       const finalWords = testPhrase.split(" ").map((word, idx) => {
         if (originalWords[idx].toLowerCase() === "x") {
@@ -147,42 +143,28 @@ async function bruteForce(originalWords, target) {
 
       console.log(colors.white + "- Phrases : " + finalWords.join(" ") + colors.reset);
       console.log(colors.white + "- Address EVM : " + colors.cyan + address + colors.reset);
-
-      const lanjut = await askQuestion(colors.yellow + "\nMau lanjut cari lagi? (Y/N) " + colors.reset);
-      if (lanjut.trim().toLowerCase() === "y") {
-        await mainMenu();
-      } else {
-        console.log(colors.green + "👋 Program selesai." + colors.reset);
-        process.exit(0);
-      }
+      process.exit(0);
     }
 
-    if (tried % 2048n === 0n) {
+    // Update progress tiap 2048 percobaan
+    if (tried % 2048n === 0n || tried === totalCombos) {
       const percent = (Number(tried) / Number(totalCombos)) * 100;
       const elapsed = (Date.now() - startTime) / 1000;
-      const speed = Number(tried) / elapsed; // percobaan per detik
+      const speed = Number(tried) / elapsed;
       const eta = speed > 0 ? (Number(totalCombos - tried) / speed) : 0;
 
-      readline.cursorTo(process.stdout, 0);
-      readline.clearLine(process.stdout, 0);
-
       process.stdout.write(
-        makeProgressBar(percent) +
+        "\r" +
+          makeProgressBar(percent) +
           ` ${percent.toFixed(2)}% | Tried: ${tried} / ${totalCombos} | ETA: ${formatTime(eta)}`
       );
     }
-
-    // Biar event loop gak blocked, kasih yield tiap 10000 iterasi
-    if (i % 10000n === 0n) await new Promise((r) => setImmediate(r));
   }
-
-  readline.cursorTo(process.stdout, 0);
-  readline.clearLine(process.stdout, 0);
 
   console.log("\n" + colors.red + "❌ Tidak ada kecocokan ditemukan." + colors.reset);
 
   await mainMenu();
 }
 
-// Run
+// Run program
 mainMenu();
