@@ -31,7 +31,7 @@ function welcomeMessage() {
   console.log(colors.cyan + "===============================================");
   console.log(" ");
   console.log(" Selamat Datang di Tools Brute Force by MrAshshiddiq");
-  console.log("              (Fork by ItsNickBarry) ");
+  console.log("              IG: maulanarahmanashshiddiq");
   console.log(" ");
   console.log("===============================================" + colors.reset);
 }
