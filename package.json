@@ -1,0 +1,17 @@
+{
+  "name": "BIP39BruteForce",
+  "version": "1.0.0",
+  "description": "Tool to brute force missing words in 12-word BIP-39 seed phrases for recovering Ethereum addresses",
+  "main": "index.js",
+  "bin": {
+    "bip39bruteforce": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Maulana Rahman Ashshiddiq",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.6.2"
+  }
+}
