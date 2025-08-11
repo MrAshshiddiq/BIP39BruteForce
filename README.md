@@ -1,5 +1,7 @@
 # The repository is still under construction, there may still be bugs or errors!
 
+## More Features soon! Currently only supports Indonesian, other languages will follow!
+
 # BIP39BruteForce
 A brute force tool to recover an **Ethereum Wallet (EVM)** from a 12-word mnemonic phrase with missing words (`x` as placeholders).  
 Includes a progress bar, ETA, and colored output for easier reading.
