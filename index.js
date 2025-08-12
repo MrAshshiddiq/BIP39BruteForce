@@ -28,12 +28,13 @@ function askQuestion(query) {
 // Clear screen + welcome
 function welcomeMessage() {
   console.clear();
-  console.log(colors.cyan + "===============================================");
+  console.log(colors.cyan + "====================================================");
   console.log(" ");
   console.log(" Selamat Datang di Tools Brute Force by MrAshshiddiq");
   console.log("              IG: maulanarahmanashshiddiq");
+  console.log("             https://github.com/MrAshshiddiq");
   console.log(" ");
-  console.log("===============================================" + colors.reset);
+  console.log("====================================================" + colors.reset);
 }
 
 // Validasi alamat dengan ethers getAddress, handle trim dan case
